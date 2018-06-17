@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% from "car/macros/macros.html" import car_card with context%}
+
+
+{% block header_mid %}
+    <h2><i class="fas fa-car"></i></h2>
+    <h1><i class="fas fa-car"></i></h1>
+    <h3><i class="fas fa-car"></i></h3>
+{% endblock header_mid %}
+
+{% block header_right %}
+    <button class="btn" id="btn-back">Back</a>
+{% endblock header_right %}
+
+
+{% block content %}
+    <div class="cars-overview">
+        {% for car in cars %}
+            {{car_card(car)}}
+        {% endfor %}
+    </div>
+    <button class="btn" id="btn-add-car"><i class="fas fa-plus"></i></button>
+{% endblock content %}
+
+
+{% block scriptblock %}
+<script>
+    document.getElementById("btn-back").addEventListener("click", function(e){
+        window.location = "{{ url_for('settings.index') }}";
+    });
+    document.getElementById("btn-add-car").addEventListener("click", function(e){
+        window.location = "{{ url_for('.new_car') }}";
+    });
+    var redirect_car_profile = function(id) {
+        window.location = window.location + "profile/" + id;
+    };
+</script>
+{% endblock scriptblock %}

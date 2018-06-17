@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% from 'race/macros/macros.html' import player_entry with context %}
+
+{% block header_mid %}
+    <div><span id="timer">10.0s</span></div>
+{% endblock header_mid %}
+
+{% block navbar_right %}
+{% endblock navbar_right %}
+
+{% block footer %}
+                <div class="mx-1">
+                    <button class="btn" id="btn-go">
+                        <i class="fas fa-play"></i> Go!
+                    </button>
+
+                    <button class="btn" id="btn-pause">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+
+                    <button class="btn" id="btn-reset">
+                        <i class="fas fa-undo"></i> Reset
+                    </button></div>
+{% endblock footer %}
+
+{% block content %}
+            <table class="table">
+                    <tr>
+                        <th>POSITION</th>
+                        <th>NAME</th>
+                        <th>TOTAL LAPS</th>
+                        <th>BEST LAP</th>
+                        <th>LAST LAP</th>
+                        <!--th>FUEL</th-->
+                    </tr>
+                <thead></thead>
+
+                {% for player in players %}
+                    {{ player_entry(loop.index, player) }}
+                {% endfor %}
+            </table>
+{% endblock content %}
+
+{% block scriptblock %}
+<script src="{{ url_for('.static', filename='js/race.js') }}"></script>
+{% endblock scriptblock %}

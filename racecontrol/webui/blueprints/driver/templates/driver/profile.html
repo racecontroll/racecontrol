@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block header_right %}
+    <button class="btn" id="btn-back">Back</button>
+{% endblock header_right %}
+
+{% block header_mid %}
+    <h1><i class="fas fa-user"></i></h1>
+{% endblock header_mid %}
+
+{% block content %}
+<div class="driver-profile">
+    <div>
+       <img src="{{ url_for('.static', filename='img/dummydriver.png') }}">
+    </div>
+    <div>
+        <form  method="POST" action="{{ url_for('.profile', id=driver.id) }}">
+            {{ form.csrf_token }}
+            {{ form.id(type="hidden", value=driver.id) }}
+            {{ form.delete(type="hidden", value="0") }}
+
+            <div>
+                <h4>Name:</h4>
+                {{ form.name(class="form-control text-center", value=driver.name, size=30) }}
+            </div>
+
+            <div>
+                <h4>Nickname:</h4>
+                {{ form.shortname(class="form-control text-center", value=driver.shortname, size=30) }}
+            </div>
+
+            <button id="btn-save-changes" class="btn" type="submit"><i class="fas fa-save"></i></button>
+            <button id="btn-delete-driver" class="btn" onclick="document.getElementById('delete').value = '1';"><i class="fas fa-trash-alt"></i></button>
+
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scriptblock %}
+<script>
+    document.getElementById("btn-back").addEventListener("click", function(e){
+        window.location = "{{ url_for('.index') }}";
+    });
+</script>
+{% endblock scriptblock %}

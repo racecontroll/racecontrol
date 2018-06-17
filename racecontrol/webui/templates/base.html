@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>RaceControl</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css?family=Gugi|Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('.static', filename='css/styles.css') }}">
+</head>
+
+<body>
+
+    <div id="header">
+
+        <div class="left">
+            <h1 class="brand"><a href="{{ url_for('core.index') }}">RaceControl</a></h1>
+            {% block header_left %}
+            {% endblock header_left %}
+        </div>
+
+        <div class="mid">
+            {% block header_mid %}
+            {% endblock header_mid %}
+        </div>
+
+        <div class="right">
+            {% block header_right %}
+            {% endblock header_right %}
+        </div>
+
+    </div>
+
+    <div id="content">
+        {% block content %}
+        {% endblock content %}
+    </div>
+
+    <div id="footer">
+        {% block footer %}
+        {% endblock footer %}
+    </div>
+
+    <script defer src="{{ url_for('static', filename='js/fontawesome-all.min.js') }}"></script>
+    {% block scriptblock %}
+    {% endblock scriptblock %}
+</body>
+
+</html>

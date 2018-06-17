@@ -1,0 +1,9 @@
+{% macro player_entry(index, player) %}
+<tr class="player-entry" id="player-{{ index }}">
+    <td id="player-{{ index }}-position">#{{ index }}</td>
+    <td>{{ player.shortname }}</td>
+    <td id="player-{{ index }}-lap-count">0</td>
+    <td id="player-{{ index }}-best-lap">0</td>
+    <td id="player-{{ index }}-lap-time-last">0s</td>
+</tr>
+{% endmacro %}

@@ -1,0 +1,18 @@
+{% macro car_card(car) %}
+<div class="carcard" onclick="redirect_car_profile({{ car.id }})">
+    <div class="left">
+        <img class="" src="{{ url_for('.static', filename='img/dummycar.png') }}">
+    </div>
+
+    <div class="right">
+        <h3>{{ car.manufacturer }}: {{ car.name }} <br>
+            {% if car.scale == -1 %}
+                Scale: Other
+            {% else %}
+                Scale: 1/{{car.scale}}
+            {% endif %}
+        </h3>
+    </div>
+
+</div>
+{% endmacro %}

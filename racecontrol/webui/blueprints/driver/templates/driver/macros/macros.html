@@ -1,0 +1,14 @@
+{% macro driver_card(driver) %}
+
+<div class="drivercard" onclick="redirect_driver_profile({{ driver.id }})">
+    <div class="left">
+        <img class="" src="{{ url_for('.static', filename='img/dummydriver.png') }}">
+    </div>
+
+    <div class="right">
+        <h3>{{driver.name}}</h3>
+        <h3>- {{driver.shortname}} -</h3>
+    </div>
+
+</div>
+{% endmacro %}

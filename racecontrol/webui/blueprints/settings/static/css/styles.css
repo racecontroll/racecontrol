@@ -1,0 +1,22 @@
+.settings-top-button {
+    min-inline-size: 100pt;
+}
+
+.settings-button {
+    min-inline-size: 160pt;
+}
+
+#content {
+    margin-top: 100px;
+    text-align: center;
+    justify-content: center;
+}
+
+#content h1 {
+    width: 100%;
+}
+
+.driver_car_menu button {
+    margin: 30px 30px;
+    width: 280px;
+}

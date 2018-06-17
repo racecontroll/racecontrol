@@ -1,0 +1,119 @@
+#content .cars-overview {
+    margin: 100px auto;
+    width: 1200px;
+    display: grid;
+    grid-template-columns: 33% auto 33%;
+    box-sizing: border-box;
+    grid-gap: 20px;
+    text-align: center;
+    align-content: center;
+    align-items: center;
+}
+
+@media only screen and (max-width: 1300px) {
+    #content .cars-overview {
+        width: 800px;
+        grid-template-columns: 50% 50%;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    #content .cars-overview {
+        width: 400px;
+        grid-template-columns: 100%;
+    }
+}
+
+.carcard {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    width: 380px;
+    height: 200px;
+    border: solid 2px #DCDCDC;
+    border-radius: 10px;
+}
+
+.carcard:hover {
+    cursor: pointer;
+}
+
+.carcard > .left > img {
+    max-width: 80%;
+    max-height: 80%;
+    border-radius: 50%;
+    padding: 10%;
+}
+
+.carcard > .right {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-align: center;
+    justify-content: center;
+}
+
+#btn-add-car {
+    position: fixed;
+    padding: 0;
+    bottom: 30px;
+    right: 40px;
+    height: 70px;
+    width: 70px;
+    border-radius: 35px;
+    font-size: 28px;
+}
+
+#content .new-car {
+    margin: 80px;
+    display: grid;
+    grid-template-columns: 100%;
+}
+
+.new-car > div {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+}
+
+.new-car img {
+    border-radius: 50%;
+    margin: 30px;
+    opacity: 0.5;
+}
+
+.new-car select, .new-car input {
+    width: 330px;
+}
+
+#content .car-profile {
+    margin-top: 75px;
+    display: grid;
+    grid-template-columns: 100%;
+}
+
+#content .car-profile > div {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+}
+
+#content .car-profile > div img {
+    border-radius: 50%;
+    margin: 50px;
+}
+
+#btn-delete-car {
+    position: fixed;
+    padding: 0;
+    bottom: 30px;
+    right: 40px;
+    height: 70px;
+    width: 70px;
+    border-radius: 35px;
+    font-size: 28px;
+}

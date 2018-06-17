@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block header_right %}
+    <button class="btn" id="btn-back">Abort</button>
+{% endblock header_right %}
+
+{% block header_mid %}
+    <h1 style="margin-right:0;"><i class="fas fa-car"></i></h1>
+    <h3 style="margin-left:4px;"><i class="fas fa-plus"></i></h3>
+{% endblock header_mid %}
+
+{% block content %}
+    <div class="new-car">
+        <div>
+            <img class="" src="{{ url_for('.static', filename='img/dummycar.png') }}">
+        </div>
+        <div>
+            <form  method="POST" action="{{ url_for('.new_car') }}" id="carform">
+                {{ form.csrf_token }}
+
+                <div class="">
+                    {{ form.name(class="", placeholder="Enter car name") }}
+                </div>
+
+                <div class="">
+                    {{ form.manufacturer(class="",placeholder="Please enter manufacturer") }}
+                </div>
+
+                <div>
+                    <select class="" name="scale" form="carform">
+                            <option value="#">Please select scale</option>
+                            <option value="24">1:24</option>
+                            <option value="32">1:32</option>
+                            <option value="43">1:43</option>
+                            <option value="-1">Other</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-success abs-center-x mt-4" type="submit">Add car!</button>
+
+            </form>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block scriptblock %}
+<script>
+    document.getElementById("btn-back").addEventListener("click", function(e){
+        window.location = "{{ url_for('.index') }}";
+    });
+</script>
+{% endblock scriptblock %}
