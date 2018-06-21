@@ -7,7 +7,7 @@
     based user interface and the actual game backend
 
     :copyright: (c) 2018 by Matthias Riegler.
-    :license: LGPLv3, see LICENSE.md for more details.
+    :license: aGPLv3, see LICENSE.md for more details.
 """
 
 

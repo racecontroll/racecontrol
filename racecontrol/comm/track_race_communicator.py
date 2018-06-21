@@ -6,7 +6,7 @@
     Communicates with the track communicator
 
     :copyright: (c) 2018 by Matthias Riegler.
-    :license: LGPLv3, see LICENSE.md for more details.
+    :license: aGPLv3, see LICENSE.md for more details.
 """
 
 

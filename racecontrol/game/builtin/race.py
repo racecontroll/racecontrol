@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     racecontrol.runner.race
-    ~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~
 
     Race implementation, no fancy modes
 
@@ -11,6 +11,8 @@
 
 
 import asyncio
+from ... import messages
+from .. import race_states
 from ..base_race import BaseRace
 
 
@@ -26,17 +28,17 @@ class Race(BaseRace):
         :returns: True if an event was handled, false otherwise. This is needed
                   so that the status can be updated(!!!)
         """
-        if request["subject"] == self.MSG_START:
+        if request["subject"] == messages.MSG_START:
             asyncio.ensure_future(self._on_start())
         else:
             return False
 
     async def _on_start(self):
         """ This method gets called on race start """
-        if self._current_state["status"] == self.STARTED:
+        if self._current_state["status"] == race_states.STARTED:
             return
 
-        self._current_state["status"] = self.STARTED
+        self._current_state["status"] = messages.STARTED
 
         print("started")
         self._started = True

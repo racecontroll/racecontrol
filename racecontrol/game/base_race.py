@@ -14,7 +14,7 @@ import asyncio
 import aioredis
 import json
 from json.decoder import JSONDecodeError
-from ... import defaults
+from .. import defaults
 from . import race_states
 from .driver import Driver
 
@@ -42,7 +42,7 @@ class BaseRace(object):
         # Incoming game events, e.g. race start/stop
         self._incoming_event_channel = incoming_event_channel
 
-        # Initialize game state and start the game
+        # Initialize game
         self._build_game_state()
 
         # Initialize task handler
