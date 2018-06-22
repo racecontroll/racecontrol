@@ -44,7 +44,11 @@ def _create_webui_task():
     def serve():
         app = create_app()
         # @TODO use wsgi backend
-        app.run("0.0.0.0", 5000, debug=True, use_reloader=False, use_debugger=False)
+        app.run(host="0.0.0.0",
+                port=5000,
+                debug=True,
+                use_reloader=False,
+                use_debugger=False)
 
     return mp.Process(target=serve)
 
@@ -71,8 +75,11 @@ def entrypoint():
         logger.error(e)
 
     finally:
-        webui_task.terminate()
-        loop.close()
+        logger.info("Killing webui thread")
+        webui_task.terminate()  # @TODO clean shutdown of the webui
+        logger.info("Stopping event loop")
+        loop.stop()
+        # loop.close()
 
 
 # Call main
