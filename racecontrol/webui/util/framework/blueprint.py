@@ -26,7 +26,7 @@ def register_blueprint(app: Flask, name: str, url_prefix: str):
     :param url_prefix: URL prefix to which the blueprint should be registered
     """
     blueprint = getattr(import_module(
-        f"app.blueprints.{name}"), "blueprint")
+        f"racecontrol.webui.blueprints.{name}"), "blueprint")
 
     if app.config["DEBUG"]:
         app.logger.debug(

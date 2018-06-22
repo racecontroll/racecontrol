@@ -24,23 +24,34 @@
 {% endblock footer %}
 
 {% block content %}
-            <table class="table">
-                    <tr>
-                        <th>POSITION</th>
-                        <th>NAME</th>
-                        <th>TOTAL LAPS</th>
-                        <th>BEST LAP</th>
-                        <th>LAST LAP</th>
-                        <!--th>FUEL</th-->
-                    </tr>
-                <thead></thead>
+            <table id="stateTable" class="table">
+              <thead>
+                <th>POSITION</th>
+                <th>NAME</th>
+                <th>TOTAL LAPS</th>
+                <th>BEST LAP</th>
+                <th>LAST LAP</th>
+              </thead>
 
-                {% for player in players %}
-                    {{ player_entry(loop.index, player) }}
-                {% endfor %}
+                {%- for player in players %}
+                {{ player_entry(loop.index - 1, player) }}
+                <span id="player-{{ loop.index - 1 }}-shortname" style="display:none">{{ player.shortname }}</span>
+                {%- endfor %}
             </table>
 {% endblock content %}
 
 {% block scriptblock %}
 <script src="{{ url_for('.static', filename='js/race.js') }}"></script>
+<script>
+  // Entrypoint
+  document.addEventListener("DOMContentLoaded", e => {
+
+    test = new WSUpdate({
+      port: 8765, //@TODO Get from defaults!
+      host: "127.0.0.1", // @TODO Dynamic host
+      path: "/gameserver" // @TODO Get from defaults!
+    });
+
+  });
+</script>
 {% endblock scriptblock %}
