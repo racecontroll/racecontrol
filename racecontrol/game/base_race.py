@@ -75,7 +75,12 @@ class BaseRace(object):
 
         # Start input event consumer
         self._ensure_future(self._input_event_consumer())
+        self.loop.create_task(self._kill_pending_on_exit())
 
+    async def _kill_pending_on_exit(self):
+        """ Kills remaining tasks when one of the infinite coroutines
+        return or throw an Exception
+        """
         # Handle all initial tasks and exit if there is an error
         done, pending = await asyncio.wait(
             self._tasks,
@@ -125,7 +130,9 @@ class BaseRace(object):
         """
         try:
             await self._redis_publish.publish(self.outgoing_event_channel,
-                                              json.dumps(self.current_state))
+                                              json.dumps({
+                                                  **self.current_state,
+                                                  "type": "update_positions"}))
         except Exception as e:
             logger.error(e)
 

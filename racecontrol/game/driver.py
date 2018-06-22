@@ -18,6 +18,7 @@ class Driver(dict):
         self["lap_count"] = 0
         self["best_time"] = -1
         self["lap_time"] = -1
+        self["best_lap"] = -1
 
     @property
     def lap_count(self):
