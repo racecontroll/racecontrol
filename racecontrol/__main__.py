@@ -11,9 +11,16 @@
 
 
 import asyncio
+try:
+    # Try to import uvloop, provides _MUCH_ better performance compared to the
+    # standart epoll based event loop
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ImportError:
+    # No uvloop installed on the system; the default eventloop works as well!
+    pass
 import logging
 import multiprocessing as mp
-# import uvloop @TODO patch websockets package (dump asyncio.ensure_future)
 from .comm import RedisWebsocketRelay
 from .game import Race
 from .webui import create_app
