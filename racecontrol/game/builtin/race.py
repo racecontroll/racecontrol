@@ -11,9 +11,13 @@
 
 
 import asyncio
+import logging
 from ... import messages
 from .. import race_states
 from ..base_race import BaseRace
+
+
+logger = logging.getLogger(__name__)
 
 
 class Race(BaseRace):
@@ -29,18 +33,25 @@ class Race(BaseRace):
                   so that the status can be updated(!!!)
         """
         if request["subject"] == messages.MSG_START:
-            asyncio.ensure_future(self._on_start())
-        else:
+            self._ensure_future(self._on_start())
+        elif request["subject"] == messages.MSG_PAUSE:
+            # @TODO
+            pass
             return False
+        else:
+            logger.warning(f"Could not handle {request}")
+            return False
+
+        return True
 
     async def _on_start(self):
         """ This method gets called on race start """
         if self._current_state["status"] == race_states.STARTED:
             return
 
-        self._current_state["status"] = messages.STARTED
+        self._current_state["status"] = race_states.STARTED
 
-        print("started")
+        logger.info("Race started")
         self._started = True
 
         # Dummy for testing @TODO

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     racecontrol.__main__
-    ~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~
 
     Magic happens here!
 
@@ -13,12 +13,16 @@
 import asyncio
 import logging
 import multiprocessing as mp
+# import uvloop @TODO patch websockets package (dump asyncio.ensure_future)
 from .comm import RedisWebsocketRelay
 from .game import Race
 from .webui import create_app
 
 
+logger = logging.getLogger(__name__)
+
 # Setup logging to debug mode for now!
+# @TODO
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -39,7 +43,8 @@ def _create_webui_task():
     """ Creats the task for the web based user interface """
     def serve():
         app = create_app()
-        app.run()
+        # @TODO use wsgi backend
+        app.run("0.0.0.0", 5000, debug=True, use_reloader=False, use_debugger=False)
 
     return mp.Process(target=serve)
 
@@ -48,20 +53,22 @@ def entrypoint():
     """ Entry point for racecontrol, all tasks get started here """
     loop = asyncio.get_event_loop()
 
+    logger.info("Setting up tasks")
+
     _create_redis_websocket_relay(loop)
     _create_race(loop)
     webui_task = _create_webui_task()
 
-    logging.info("Starting racecontrol!")
+    logger.info("Starting racecontrol")
     try:
         webui_task.start()
         loop.run_forever()
 
     except KeyboardInterrupt:
-        logging.info("Received keyboard interrupt, Shutting down!")
+        logger.info("Received keyboard interrupt, Shutting down!")
 
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
 
     finally:
         webui_task.terminate()

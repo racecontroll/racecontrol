@@ -15,7 +15,11 @@ import logging
 import asyncio
 import aioredis
 import websockets
+import functools
 from .. import defaults
+
+
+logger = logging.getLogger(__name__)
 
 
 class RedisWebsocketRelay(object):
@@ -30,7 +34,9 @@ class RedisWebsocketRelay(object):
             port=defaults.WEBSOCKET_PORT,
             redis_uri=defaults.REDIS_URI,
             outgoing_event_channel=defaults.OUTGOING_EVENT_CHANNEL,
-            incoming_event_channel=defaults.INCOMING_EVENT_CHANNEL
+            incoming_event_channel=defaults.INCOMING_EVENT_CHANNEL,
+            outgoing_websocket_path=defaults.WEBSOCKET_STREAM_PATH,
+            incoming_websocket_path=defaults.WEBSOCKET_INPUT_PATH
             ):
         """ Initializes the Redis websocket Relay """
         # Event loop
@@ -45,16 +51,19 @@ class RedisWebsocketRelay(object):
         self._host = host
         # Websocket port
         self._port = port
+        # Websocket stream path
+        self._outgoing_websocket_path = outgoing_websocket_path
+        # Websocket input path
+        self._incoming_websocket_path = incoming_websocket_path
 
-        # Async init
-        loop.create_task(self._ainit())
+        # Create Websocket server
+        self.loop.run_until_complete(
+                websockets.serve(
+                    functools.partial(RedisWebsocketRelay.relay, self),
+                    self.host,
+                    self.port))
 
-    async def _ainit(self):
-        """ Async init of the websocket relay """
-        self.loop.create_task(websockets.serve(self.relay,
-                                               self.host,
-                                               self.port))
-        logging.info("Created websocket startup task")
+        logger.info("Created websocket server")
 
     async def get_pubsub(self, channel):
         """ Actual relay for gameserver events """
@@ -83,8 +92,7 @@ class RedisWebsocketRelay(object):
     async def game_event_producer(self, ws):
         """ Actual relay for gameserver events """
         # Get the pubsub channel
-        pubsub = await RedisWebsocketRelay.get_pubsub(
-                                                self.outgoing_event_channel)
+        pubsub = await self.get_pubsub(self.outgoing_event_channel)
 
         # Just relay json messages to the ws
         while await pubsub.wait_message():
@@ -106,22 +114,22 @@ class RedisWebsocketRelay(object):
         :param ws: websocket
         :param path: Connection path
         """
-        if path != "/gamestream":
-            logging.warning(f"{ws.remote_address} tried to connect to {path}")
+        if path != self.outgoing_websocket_path:
+            logger.warning(f"{ws.remote_address} tried to connect to {path}")
         else:
-            logging.info(f"{ws.remote_address} connected to {path}")
+            logger.info(f"{ws.remote_address} connected to {path}")
 
-        logging.info(f"Client connected to path: {path}")
+        logger.debug(f"Client connected to path: {path}")
 
-        logging.info("Startup game event producer")
+        logger.debug("Startup game event producer")
         event_producer = self.loop.create_task(
                 self.game_event_producer(ws))
 
-        logging.info("Start input event consumer")
+        logger.debug("Start input event consumer")
         input_consumer = self.loop.create_task(
                 self.input_event_consumer(ws))
 
-        logging.info("Start input event consumer")
+        logger.debug("Start input event consumer")
         dead_end_watcher = self.loop.create_task(
                 self.dead_end_checker(ws))
 
@@ -139,7 +147,7 @@ class RedisWebsocketRelay(object):
         for task in pending:
             task.cancel()
 
-        logging.info(f"{ws.remote_address} disconnected")
+        logger.info(f"{ws.remote_address} disconnected")
 
     @property
     def loop(self):
@@ -170,3 +178,13 @@ class RedisWebsocketRelay(object):
     def incoming_event_channel(self):
         """ incoming event channel """
         return self._incoming_event_channel
+
+    @property
+    def outgoing_websocket_path(self):
+        """ outgoing websocket stream path"""
+        return self._outgoing_websocket_path
+
+    @property
+    def incoming_websocket_path(self):
+        """ incoming websocket stream path"""
+        return self._incoming_websocket_path

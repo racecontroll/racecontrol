@@ -19,6 +19,9 @@ from . import race_states
 from .driver import Driver
 
 
+logger = logging.getLogger(__name__)
+
+
 class BaseRace(object):
     """ Basis for the different race modes """
 
@@ -48,6 +51,7 @@ class BaseRace(object):
         # Initialize task handler
         self._tasks = []
         loop.create_task(self._ainit())
+        logger.info("Created startup task for the actual race interface")
 
     def _ensure_future(self, future):
         """ Adds a future to the task queue, so every running task can be
@@ -79,7 +83,7 @@ class BaseRace(object):
         )
 
         if pending:
-            logging.warning("Race might have ended unexpected")
+            logger.warning("Race might have ended unexpected")
 
         for task in pending:
             task.cancel()
@@ -123,7 +127,7 @@ class BaseRace(object):
             await self._redis_publish.publish(self.outgoing_event_channel,
                                               json.dumps(self.current_state))
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
 
     async def _get_driver_lap_count(self):
         """ Get the lap count for each driver
@@ -159,16 +163,15 @@ class BaseRace(object):
 
             try:
                 request = await self._subscribe.get_json()
-                print(request)
                 if await self._handle_request(request):
-                    asyncio.ensure_future(self._push_state())
-                asyncio.ensure_future
+                    logger.info("Received new package")
+                    self._ensure_future(self._push_state())
 
             except TypeError as te:
-                logging.warning(te)
+                logger.warning(te)
 
             except JSONDecodeError:
-                logging.warning("invalid json request")
+                logger.warning("invalid json request")
 
     async def _setup_race(self):
         """ Race setup goes here, should setup the racemode """
@@ -176,7 +179,7 @@ class BaseRace(object):
 
     async def _handle_request(self, request):
         """ Request handling goes here """
-        logging.error("_handle_request(self, request) NOT IMPLEMETED")
+        logger.error("_handle_request(self, request) NOT IMPLEMETED")
         raise NotImplementedError()
 
     @property
