@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 # Setup logging to debug mode for now!
 # @TODO
+# logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.DEBUG)
 
 

@@ -46,12 +46,18 @@
   // Entrypoint
   document.addEventListener("DOMContentLoaded", e => {
 
-    test = new WSUpdate({
+    // Connect to the websocket
+    racecontrol = new WSUpdate({
       port: 8765, //@TODO Get from defaults!
       host: "127.0.0.1", // @TODO Dynamic host
-      path: "/gameserver" // @TODO Get from defaults!
+      streamPath: "gamestream", // @TODO Get from defaults!
+      inputPath: "input" // @TODO Get from defaults!
     });
 
+    // Button functions
+    document.getElementById("btn-go").addEventListener("click", e => racecontrol.start())
+    document.getElementById("btn-pause").addEventListener("click", e => racecontrol.pause())
+    document.getElementById("btn-reset").addEventListener("click", e => racecontrol.reset())
   });
 </script>
 {% endblock scriptblock %}

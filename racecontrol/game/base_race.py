@@ -13,10 +13,12 @@ import logging
 import asyncio
 import aioredis
 import json
+from pprint import pformat
 from json.decoder import JSONDecodeError
 from .. import defaults
 from . import race_states
 from .driver import Driver
+from .. import messages
 
 
 logger = logging.getLogger(__name__)
@@ -129,10 +131,19 @@ class BaseRace(object):
         the websocket connection established by the web based UI
         """
         try:
-            await self._redis_publish.publish(self.outgoing_event_channel,
-                                              json.dumps({
-                                                  **self.current_state,
-                                                  "type": "update_positions"}))
+            _state_packet = {
+                    **self.current_state,
+                    "type": messages.REDIS_MSG_TYPE_STATE_PUSH
+                    }
+
+            _num_receivers = await self._redis_publish.publish(
+                    self.outgoing_event_channel,
+                    json.dumps(_state_packet))
+
+            # Debug output for the current state and receiver count
+            logger.debug(f"Current game state received by {_num_receivers} " +
+                         "clients")
+            logger.debug(f"Current game state: {pformat(_state_packet)}")
         except Exception as e:
             logger.error(e)
 

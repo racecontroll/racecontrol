@@ -104,8 +104,15 @@ class RedisWebsocketRelay(object):
 
     async def input_event_consumer(self, ws):
         """ Relays incoming messages to a pubsub channel """
-        while True:
-            await asyncio.sleep(1000)
+        # Connect to redis
+        pub = await aioredis.create_redis(self.redis_uri)
+
+        async for message in ws:
+            try:
+                # Forward incoming messages to the pubsub channel
+                pub.publish(self.incoming_event_channel, message)
+            except websockets.exceptions.ConnectionClosed:
+                break
 
     async def relay(self, ws, path):
         """ Most basic real time websocket relay for game events pushed by the
@@ -114,32 +121,33 @@ class RedisWebsocketRelay(object):
         :param ws: websocket
         :param path: Connection path
         """
-        if path != self.outgoing_websocket_path:
-            logger.warning(f"{ws.remote_address} tried to connect to {path}")
+        tasks = []
+
+        # Outgoing
+        if path == self.outgoing_websocket_path:
+            logger.debug("Startup game event producer")
+            tasks.append(self.loop.create_task(self.game_event_producer(ws)))
+
+        # Incoming
+        elif path == self.incoming_websocket_path:
+            logger.debug("Start input event consumer")
+            tasks.append(self.loop.create_task(self.input_event_consumer(ws)))
+
+        # Default: Drop
         else:
-            logger.info(f"{ws.remote_address} connected to {path}")
+            logger.warning(f"{ws.remote_address} tried to connect to {path}")
+            return
 
-        logger.debug(f"Client connected to path: {path}")
+        # Some logging info
+        logger.info(f"{ws.remote_address} connected to {path}")
 
-        logger.debug("Startup game event producer")
-        event_producer = self.loop.create_task(
-                self.game_event_producer(ws))
-
-        logger.debug("Start input event consumer")
-        input_consumer = self.loop.create_task(
-                self.input_event_consumer(ws))
-
-        logger.debug("Start input event consumer")
-        dead_end_watcher = self.loop.create_task(
-                self.dead_end_checker(ws))
+        # Start dead end checker
+        tasks.append(self.loop.create_task(self.dead_end_checker(ws)))
+        logger.debug(f"{ws.remote_address} started dead end checker")
 
         # wait for one of the two to terminate
         done, pending = await asyncio.wait(
-            [
-                event_producer,
-                input_consumer,
-                dead_end_watcher
-            ],
+            tasks,
             return_when=asyncio.FIRST_COMPLETED,
         )
 

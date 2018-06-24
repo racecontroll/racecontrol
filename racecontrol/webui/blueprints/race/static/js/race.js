@@ -6,9 +6,10 @@ class WSUpdate {
   /**
    * Connects to a websocket
    **/
-  constructor({host, port, path}) {
-    this.conn = new WebSocket(`ws://${host}:${port}/${path}`);
-    this.conn.onmessage = this.handle;
+  constructor({host, port, streamPath, inputPath}) {
+    this.stream = new WebSocket(`ws://${host}:${port}/${streamPath}`);
+    this.input = new WebSocket(`ws://${host}:${port}/${inputPath}`);
+    this.stream.onmessage = this.handle;
   }
 
   /**
@@ -70,6 +71,58 @@ class WSUpdate {
 
     // Set new table
     document.getElementById("stateTable").innerHTML = tableInnerHTML;
+  }
+
+  /**
+   * Start game
+   */
+  start() {
+    console.log("Starting race");
+    try {
+      this.input.send(JSON.stringify({"request": "start"}));
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * Pause game
+   */
+  pause() {
+    try {
+    this.input.send(JSON.stringify({"request": "pause"}));
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * Reset game
+   */
+  reset() {
+    try {
+    this.input.send(JSON.stringify({"request": "reset"}));
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * @TODO REMOVE
+   *
+   * Sends a track event
+   */
+  trackEvent({trackId, time}) {
+    try {
+      this.input.send(JSON.stringify({
+        "request": "track",
+        "type": "lap_finished",
+        "track_id": trackId,
+        "lap_finished": time
+      }));
+    } catch(e)  {
+      console.error(e);
+    }
   }
 
 }
