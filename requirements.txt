@@ -1,7 +1,7 @@
+uvloop
 aioredis
 websockets
 asyncserial
 flask
 flask-wtf
 flask-sqlalchemy
-psycopg2
