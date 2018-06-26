@@ -6,7 +6,7 @@
     Redis <-> Websocket relay for the realtime communication between the web
     based user interface and the actual game backend
 
-    :copyright: (c) 2018 by Matthias Riegler.
+    :author: Matthias Riegler, 2018
     :license: aGPLv3, see LICENSE.md for more details.
 """
 

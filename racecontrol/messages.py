@@ -6,7 +6,7 @@
     Messages send over the pubsub channel that are registered by the running
     game server
 
-    :copyright: (c) 2018 by Matthias Riegler.
+    :author: Matthias Riegler, 2018
     :license: aGPLv3, see LICENSE.md for more details.
 
 

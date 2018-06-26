@@ -5,7 +5,7 @@
 
     Actual racemodes are in this submodule
 
-    :copyright: (c) 2018 by Matthias Riegler.
+    :author: Matthias Riegler, 2018
     :license: aGPLv3, see LICENSE.md for more details.
 """
 
