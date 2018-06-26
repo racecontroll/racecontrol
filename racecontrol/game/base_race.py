@@ -143,7 +143,8 @@ class BaseRace(object):
             # Debug output for the current state and receiver count
             logger.debug(f"Current game state received by {_num_receivers} " +
                          "clients")
-            logger.debug(f"Current game state: {pformat(_state_packet)}")
+            logger.debug("Current game state:\n" +
+                         f"{pformat(_state_packet)}")
         except Exception as e:
             logger.error(e)
 

@@ -23,7 +23,7 @@ import logging
 import multiprocessing as mp
 from .comm import RedisWebsocketRelay
 from .game import Race
-from .webui import create_app
+from .webui import create_app, db
 
 
 logger = logging.getLogger(__name__)
@@ -50,13 +50,18 @@ def _create_race(loop):
 def _create_webui_task():
     """ Creats the task for the web based user interface """
     def serve():
-        app = create_app()
+        webui = create_app()
+
+        # @TODO only do one
+        with webui.app_context():
+            db.create_all()
+
         # @TODO use wsgi backend
-        app.run(host="0.0.0.0",
-                port=5000,
-                debug=True,
-                use_reloader=False,
-                use_debugger=False)
+        webui.run(host="0.0.0.0",
+                  port=5000,
+                  debug=True,
+                  use_reloader=False,
+                  use_debugger=False)
 
     return mp.Process(target=serve)
 
