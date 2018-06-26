@@ -43,12 +43,11 @@ setup(
     version="0.0.1a",
     description="Racecontrol",
     long_description=parse_long_description(),
-    url="@TODO",
-    author="@TODO",
-    author_email="@TODO",
+    url="https://github.com/racecontroll/racecontrol",
+    author="Matthias Riegler",
+    author_email="matthias@xvzf.tech",
 
     classifiers=[
-        "Development Status :: 3 - Production/Alpha",
         "Programming Language :: Python :: 3",
     ],
 
