@@ -8,6 +8,7 @@
     :author: Matthias Riegler, 2018
     :license: aGPLv3, see LICENSE.md for more details.
 """
+import sys
 
 
 class Driver(dict):
@@ -43,5 +44,7 @@ class Driver(dict):
 
     def _update_driver_best_lap(self):
         """ Updates the drivers best lap  """
-        if self["lap_time"] > self["best_time"]:
+        if self.best_time < 0:
+            self["best_time"] = self["lap_time"]
+        elif self["lap_time"] < self["best_time"]:
             self["best_time"] = self["lap_time"]
