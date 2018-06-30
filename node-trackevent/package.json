@@ -1,0 +1,10 @@
+{
+  "name": "node-trackevent-web",
+  "version": "0.0.1",
+  "description": "trackevent web interface for testing ",
+  "dependencies": {
+    "express": "^4.16.3",
+    "redis": "^2.8.0",
+    "socket.io": "^2.1.1"
+  }
+}
