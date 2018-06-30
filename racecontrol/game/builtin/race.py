@@ -60,10 +60,6 @@ class Race(BaseRace):
         logger.info("Race started")
         self._started = True
 
-        # Dummy for testing @TODO
-        self._ensure_future(self._tmp_player0())
-        self._ensure_future(self._tmp_player1())
-
     async def _on_track_event(self, request):
         """ This method gets called when a track event is registered """
         try:
@@ -82,13 +78,3 @@ class Race(BaseRace):
 
         except KeyError as ke:
             logging.error(f"Could not find {ke} in a seemingly valid request")
-
-    async def _tmp_player0(self):
-        while True:
-            await self._on_lap_finished(0, 100)
-            await asyncio.sleep(2)
-
-    async def _tmp_player1(self):
-        while True:
-            await self._on_lap_finished(1, 100)
-            await asyncio.sleep(3)
