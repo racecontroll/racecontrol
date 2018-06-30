@@ -47,19 +47,21 @@
       // Connect to socketio
       const sio = io();
 
-      const get_track_event = (index) => {
-        return JSON.stringify({
-          "track_id": index,
-          "time": $(`#track-${index}-time`).val()
-        });
-      };
-
       // Register event handler
+      const number_regex = /^[0-9]+$/;
       for(let i = 0; i < 4; i++) {
         $(`#track-${i}`).click(() => {
-          const track_event = get_track_event(i);
-          console.log(track_event)
-          sio.emit("track-event", track_event);
+          time_input = $(`#track-${i}-time`).val();
+          if(!time_input.match(number_regex)) {
+            alert("Please input a valid number");
+            return;
+          }
+
+          const track_event = {
+            "track_id": i,
+            "time": time_input
+          };
+          sio.emit("track-event", JSON.stringify(track_event));
         });
       }
     </script>
