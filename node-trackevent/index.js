@@ -33,11 +33,11 @@ sio.on("connection",(socket) => {
     console.log(`Received track event: ${e}`);
     // Push to redis pubsub input_events
     const pub_event = {
-        request: "track",
+        request: "track_event",
         type: "lap_finished",
-        ...e
+        ...JSON.parse(e)
       };
-    pub.publish("input_events", pub_event);
+    redis.publish("input_events", JSON.stringify(pub_event));
   }) 
 
   // Disconnect
