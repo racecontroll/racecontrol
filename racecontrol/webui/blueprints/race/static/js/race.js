@@ -62,8 +62,8 @@ class WSUpdate {
                       <td id="player-${driverId}-position">#${driverId}</td>
                       <td>${shortname}</td>
                       <td id="player-${driverId}-lap-count">${currState[driverId].lap_count}</td>
-                      <td id="player-${driverId}-best-lap">${currState[driverId].best_time}s</td>
-                      <td id="player-${driverId}-lap-time-last">${currState[driverId].lap_time}s</td>
+                      <td id="player-${driverId}-best-lap">${currState[driverId].best_time / 1000.0}s</td>
+                      <td id="player-${driverId}-lap-time-last">${currState[driverId].lap_time / 1000.0}s</td>
                   </tr>`;
       tableInnerHTML += row;
     }
