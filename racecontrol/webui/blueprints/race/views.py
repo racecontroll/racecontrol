@@ -9,4 +9,6 @@ def index():
     """
     return render_template("race/race.html",
                            players=[{"shortname": "Player 1"},
-                                    {"shortname": "Player 2"}])
+                                    {"shortname": "Player 2"},
+                                    {"shortname": "Player 3"},
+                                    {"shortname": "Player 4"}])
