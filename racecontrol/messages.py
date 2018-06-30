@@ -23,7 +23,7 @@ MSG_RESET = "pause"
 
 # a request should look like:
 #       {type, **typeargs}
-MSG_TRACK_EVENT = "track"
+MSG_TRACK_EVENT = "track_event"
 # lap_finished passes {"track_id": ..., "time"}
 MSG_TRACK_EVENT_LAP_FINISHED = "lap_finished"
 

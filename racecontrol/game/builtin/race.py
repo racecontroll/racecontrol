@@ -43,7 +43,7 @@ class Race(BaseRace):
             pass
             return False
         elif request["request"] == messages.MSG_TRACK_EVENT:
-            return await self._on_track_event()
+            return await self._on_track_event(request)
         else:
             logger.warning(f"Could not handle {request}")
             return False
