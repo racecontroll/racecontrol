@@ -25,6 +25,8 @@ class Race(BaseRace):
 
     async def _setup_race(self):
         """ Initializes all tasks """
+        self._started = False
+        self._paused = False
         self._driver_track_mapping = {}
         for driver in range(self._num_drivers):
             # Map the track to a driver
@@ -67,8 +69,9 @@ class Race(BaseRace):
                 if self._started:
                     # Register the driver
                     await self._on_lap_finished(
-                            self._driver_track_mapping[request["track_id"]],
-                            request["time"])
+                            self._driver_track_mapping[
+                                int(request["track_id"])],
+                            int(request["time"]))
                 else:
                     logger.warning(
                             "Registered track event with no running race")

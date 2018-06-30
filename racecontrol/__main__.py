@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 
 # Setup logging to debug mode for now!
 # @TODO
-# logging.basicConfig(level=logging.INFO)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 def _create_redis_websocket_relay(loop):
@@ -43,7 +43,7 @@ def _create_redis_websocket_relay(loop):
 
 def _create_race(loop):
     """ Creats the Race """
-    race = Race(loop, num_drivers=2)
+    race = Race(loop, num_drivers=4)
     return race
 
 
