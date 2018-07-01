@@ -9,3 +9,24 @@ table th, table td {
     text-align: center;
     border: 1px solid #333;
 }
+
+#ws-status {
+    color: #333;
+    text-align: center;
+    font-family: inherit;
+    font-size: 20px;
+    border: none;
+    height: 50px;
+    width: 50px;
+    border-radius: 25px;
+    transition: all 1.0s;
+}
+
+.ws-status-ok {
+    background-color: #0f0;
+}
+
+.ws-status-failed {
+    color: #f1f1f1 !important;
+    background-color: #f00;
+}
