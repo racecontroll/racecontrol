@@ -8,7 +8,6 @@
     :author: Matthias Riegler, 2018
     :license: aGPLv3, see LICENSE.md for more details.
 """
-import sys
 
 
 class Driver(dict):

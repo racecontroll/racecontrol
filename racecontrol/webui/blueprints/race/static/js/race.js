@@ -21,7 +21,8 @@ class WSUpdate {
       const input = JSON.parse(e.data);
       switch(input.type) {
         case "update_positions":
-          WSUpdate.updateView(input);
+          WSUpdate.updatePositionView(input);
+          WSUpdate.updateUiButtons(input.status);
           break;
         default:
           console.log(`Unknown type: ${input.type}`);
@@ -29,6 +30,48 @@ class WSUpdate {
       }
     } catch(e) {
       console.error(e);
+    }
+  }
+
+  /**
+   * Updates the UI icons based on the game state
+   */
+  static updateUiButtons(status) {
+    const default_bg_color = "#333";
+    const clickable_bg_color = "#0f0";
+
+    switch(status) {
+      case "not_started":
+        console.log("Race not started yet");
+        jsDisableElement("btn-pause");
+        jsEnableElement("btn-go");
+        // Change text
+        document.getElementById("btn-go-caption").innerHTML = " Start"
+        document.getElementById("btn-pause-caption").innerHTML = ""
+        break;
+      case "started":
+        console.log("Race running");
+        jsDisableElement("btn-go");
+        jsEnableElement("btn-pause");
+        // Change text
+        document.getElementById("btn-go-caption").innerHTML = ""
+        document.getElementById("btn-pause-caption").innerHTML = " Pause"
+        break;
+      case "paused":
+        console.log("Race paused");
+        jsDisableElement("btn-pause");
+        jsEnableElement("btn-go");
+        // Change text
+        document.getElementById("btn-go-caption").innerHTML = " Resume"
+        document.getElementById("btn-pause-caption").innerHTML = ""
+        break;
+      case "finished":
+        console.log("Race finished");
+        jsDisableElement("btn-pause");
+        jsDisableElement("btn-go");
+        break;
+      default:
+        console.log(`Unknown status: ${status}`);
     }
   }
 
@@ -50,7 +93,7 @@ class WSUpdate {
   /**
    * Generates the dynamic position view
    */
-  static updateView(currState) {
+  static updatePositionView(currState) {
     let tableInnerHTML = WSUpdate.getTableHeader() + "<tr>";
 
     // Iterate over the state and generate the inner HTML for the table
@@ -124,5 +167,19 @@ class WSUpdate {
       console.error(e);
     }
   }
+}
 
+// Love u stackoverflow
+function jsEnableElement(id) {
+  if (document.getElementById(id)) {
+    document.getElementById(id).removeAttribute("btn-disabled");
+    document.getElementById(id).className = "btn-enabled";
+  }
+}
+
+function jsDisableElement(id) {
+  if (document.getElementById(id)) {
+    document.getElementById(id).removeAttribute("btn-enabled");
+    document.getElementById(id).className = "btn-disabled";
+  }
 }

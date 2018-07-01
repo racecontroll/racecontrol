@@ -82,6 +82,18 @@ class BaseRace(object):
         self._ensure_future(self._input_event_consumer())
         self.loop.create_task(self._kill_pending_on_exit())
 
+        # Push state every second
+        self._ensure_future(self._periodic_state_push())
+
+    async def _periodic_state_push(self, sleep_time=1):
+        """ Pushes the game state at a given number of seconds
+
+        :param sleep_time: Number of seconds between state push
+        """
+        while True:
+            self._ensure_future(self._push_state())
+            await asyncio.sleep(sleep_time)
+
     async def _kill_pending_on_exit(self):
         """ Kills remaining tasks when one of the infinite coroutines
         return or throw an Exception
@@ -108,7 +120,7 @@ class BaseRace(object):
 
         #: Stores the current driver positions
         self._current_state["positions"] = \
-            [driver for driver in range(self.num_drivers)]
+            [(driver, 0) for driver in range(self.num_drivers)]
 
         # Populate all driver entries
         for driver in range(self.num_drivers):

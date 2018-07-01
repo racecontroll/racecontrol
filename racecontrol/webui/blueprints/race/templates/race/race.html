@@ -11,16 +11,16 @@
 {% block footer %}
                 <div class="mx-1">
                     <button class="btn" id="btn-go">
-                        <i class="fas fa-play"></i> Go!
+                        <i class="fas fa-play"></i><span id="btn-go-caption">Go!</span>
                     </button>
 
                     <button class="btn" id="btn-pause">
-                        <i class="fas fa-pause"></i> Pause
+                        <i class="fas fa-pause"></i> <span id="btn-pause-caption">Pause</span>
                     </button>
 
-                    <button class="btn" id="btn-reset">
+                    <!--button class="btn" id="btn-reset">
                         <i class="fas fa-undo"></i> Reset
-                    </button></div>
+                    </button--></div>
 {% endblock footer %}
 
 {% block content %}
@@ -57,7 +57,7 @@
     // Button functions
     document.getElementById("btn-go").addEventListener("click", e => racecontrol.start())
     document.getElementById("btn-pause").addEventListener("click", e => racecontrol.pause())
-    document.getElementById("btn-reset").addEventListener("click", e => racecontrol.reset())
+    // document.getElementById("btn-reset").addEventListener("click", e => racecontrol.reset())
   });
 </script>
 {% endblock scriptblock %}
