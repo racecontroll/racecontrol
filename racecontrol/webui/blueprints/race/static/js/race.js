@@ -173,13 +173,13 @@ class WSUpdate {
 function jsEnableElement(id) {
   if (document.getElementById(id)) {
     document.getElementById(id).removeAttribute("btn-disabled");
-    document.getElementById(id).className = "btn-enabled";
+    document.getElementById(id).className = "btn btn-enabled";
   }
 }
 
 function jsDisableElement(id) {
   if (document.getElementById(id)) {
     document.getElementById(id).removeAttribute("btn-enabled");
-    document.getElementById(id).className = "btn-disabled";
+    document.getElementById(id).className = "btn btn-disabled";
   }
 }
