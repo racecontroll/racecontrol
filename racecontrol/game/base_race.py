@@ -49,6 +49,9 @@ class BaseRace(object):
 
         # Initialize game
         self._build_game_state()
+        self._started = False
+        self._paused = False
+        self._finished = False
 
         # Initialize task handler
         self._tasks = []
@@ -79,6 +82,18 @@ class BaseRace(object):
         self._ensure_future(self._input_event_consumer())
         self.loop.create_task(self._kill_pending_on_exit())
 
+        # Push state every second
+        self._ensure_future(self._periodic_state_push())
+
+    async def _periodic_state_push(self, sleep_time=1):
+        """ Pushes the game state at a given number of seconds
+
+        :param sleep_time: Number of seconds between state push
+        """
+        while True:
+            self._ensure_future(self._push_state())
+            await asyncio.sleep(sleep_time)
+
     async def _kill_pending_on_exit(self):
         """ Kills remaining tasks when one of the infinite coroutines
         return or throw an Exception
@@ -105,7 +120,7 @@ class BaseRace(object):
 
         #: Stores the current driver positions
         self._current_state["positions"] = \
-            [driver for driver in range(self.num_drivers)]
+            [(driver, 0) for driver in range(self.num_drivers)]
 
         # Populate all driver entries
         for driver in range(self.num_drivers):
@@ -183,7 +198,6 @@ class BaseRace(object):
             try:
                 request = await self._subscribe.get_json()
                 if await self._handle_request(request):
-                    logger.info("Received new package")
                     self._ensure_future(self._push_state())
 
             except TypeError as te:
@@ -200,6 +214,47 @@ class BaseRace(object):
         """ Request handling goes here """
         logger.error("_handle_request(self, request) NOT IMPLEMETED")
         raise NotImplementedError()
+
+    @property
+    def started(self):
+        """ True if the race is started """
+        return self._started
+
+    @started.setter
+    def started(self, val):
+        if val and not self._started and not self.paused and not self.finished:
+            self._started = val
+            self._current_state["status"] = race_states.STARTED
+            self._ensure_future(self._push_state())
+
+    @property
+    def paused(self):
+        """ True if the race is paused """
+        return self._paused
+
+    @paused.setter
+    def paused(self, val):
+        if self.started and not self.finished:
+            self._paused = val
+            if val:
+                self._current_state["status"] = race_states.PAUSED
+                self._ensure_future(self._push_state())
+            else:
+                self._current_state["status"] = race_states.STARTED
+                self._ensure_future(self._push_state())
+
+    @property
+    def finished(self):
+        """ True if the race is finished """
+        return self._finished
+
+    @finished.setter
+    def finished(self, val):
+        if val and self.started and not self.paused:
+            self._finished = val
+            self._current_state["status"] = race_states.FINISHED
+            # DO NOT ADD THIS TO THE TASK LIST
+            self.loop.create_task(self._push_state())
 
     @property
     def loop(self):
