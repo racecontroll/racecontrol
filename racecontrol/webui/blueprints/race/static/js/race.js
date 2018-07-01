@@ -4,12 +4,43 @@
 class WSUpdate {
 
   /**
-   * Connects to a websocket
+   * Connects to the backend
    **/
-  constructor({host, port, streamPath, inputPath}) {
-    this.stream = new WebSocket(`ws://${host}:${port}/${streamPath}`);
-    this.input = new WebSocket(`ws://${host}:${port}/${inputPath}`);
-    this.stream.onmessage = this.handle;
+  constructor(args) {
+    this.args = args;
+    setTimeout(() => this.connect(this.args), 3000);
+  }
+
+  /**
+   * Connects to the websocket
+   */
+  connect({host, port, streamPath, inputPath}) {
+    try {
+      this.stream = new WebSocket(`ws://${host}:${port}/${streamPath}`);
+      this.input = new WebSocket(`ws://${host}:${port}/${inputPath}`);
+      this.stream.onmessage = this.handle;
+
+      WSUpdate.setWSOK();
+    } catch(e) {
+      WSUpdate.setWSFailed();
+      setTimeout(() => this.connect(this.args), 3000);
+    }
+  }
+
+  /**
+   * Sets the ws status to failed
+   */
+  static setWSFailed() {
+    document.getElementById("ws-status").className = "ws-status-failed";
+    document.getElementById("ws-status").innerHTML = "<i class=\"fas fa-sync fa-spin\"></i>";
+  }
+
+  /**
+   * Sets the ws status to OK
+   */
+  static setWSOK() {
+    document.getElementById("ws-status").className = "ws-status-ok";
+    document.getElementById("ws-status").innerHTML = "<i class=\"fas fa-plug\"></i>";
   }
 
   /**
@@ -172,14 +203,12 @@ class WSUpdate {
 // Love u stackoverflow
 function jsEnableElement(id) {
   if (document.getElementById(id)) {
-    document.getElementById(id).removeAttribute("btn-disabled");
     document.getElementById(id).className = "btn btn-enabled";
   }
 }
 
 function jsDisableElement(id) {
   if (document.getElementById(id)) {
-    document.getElementById(id).removeAttribute("btn-enabled");
     document.getElementById(id).className = "btn btn-disabled";
   }
 }
