@@ -39,8 +39,10 @@ class Race(BaseRace):
         if request["request"] == messages.MSG_START:
             self._ensure_future(self._on_start())
         elif request["request"] == messages.MSG_PAUSE:
-            # Cleanup! Do NOT add this to the task list!
             self.loop.create_task(self._on_pause())
+        elif request["request"] == messages.MSG_FINISH:
+            # Cleanup! Do NOT add this to the task list!
+            self.loop.create_task(self._on_finish())
         elif request["request"] == messages.MSG_TRACK_EVENT:
             self._ensure_future(self._on_track_event(request))
         else:
