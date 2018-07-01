@@ -129,26 +129,39 @@ body {
     display: none;
 }
 
-.btn-enabled {
+.btn {
     padding: 4px 16px;
     margin: 0px;
     display: inline-block;
     color: #f1f1f1;
-    background-color: #f00;
+    background-color: #333;
     text-align: center;
     font-family: inherit;
     font-size: 18px;
-    border: none 2px #333;
+    border: none;
     cursor: pointer;
     height: 50px;
     border-radius: 25px;
     transition: all 0.3s;
 }
 
+.btn:hover {
+    color: #333;
+    background-color: #f1f1f1;
+}
+
+.btn-enabled {
+    background-color: #f00;
+}
+
+.btn-disabled {
+    display: none;
+}
+
+
 .btn-enabled:hover {
     color: #f00;
     background-color: #f1f1f1;
-    border: none 2px #333;
 }
 
 .btn-lg {
@@ -161,10 +174,10 @@ body {
     color: #f1f1f1;
     margin-right: 20px;
     background-color: #ff3030;
-    border-color: #ff3030;
 }
 
 #header #btn-back:hover {
+    color: #ff3030;
     background-color: inherit;
 }
 
