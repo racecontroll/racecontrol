@@ -15,16 +15,23 @@ class WSUpdate {
    * Connects to the websocket
    */
   connect({host, port, streamPath, inputPath}) {
-    try {
-      this.stream = new WebSocket(`ws://${host}:${port}/${streamPath}`);
-      this.input = new WebSocket(`ws://${host}:${port}/${inputPath}`);
-      this.stream.onmessage = this.handle;
+    this.stream = new WebSocket(`ws://${host}:${port}/${streamPath}`);
+    this.input = new WebSocket(`ws://${host}:${port}/${inputPath}`);
+    this.stream.onmessage = this.handle;
 
-      WSUpdate.setWSOK();
-    } catch(e) {
+    /*
+    this.stream.onerror = () => {
       WSUpdate.setWSFailed();
       setTimeout(() => this.connect(this.args), 3000);
-    }
+    };
+    */
+
+    this.stream.onclose = () => {
+      WSUpdate.setWSFailed();
+      this.stream.close()
+      this.input.close()
+      setTimeout(() => this.connect(this.args), 3000);
+    };
   }
 
   /**
@@ -47,6 +54,8 @@ class WSUpdate {
    * Handles incoming messages
    */
   handle(e) {
+    // WS is likely ok if we receive data!
+    WSUpdate.setWSOK();
     try {
       // Parse input
       const input = JSON.parse(e.data);
