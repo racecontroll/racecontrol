@@ -10,10 +10,9 @@
 """
 
 
-import asyncio
 import logging
 from ... import messages
-from .. import race_states
+from pprint import pformat
 from ..base_race import BaseRace
 
 
@@ -25,8 +24,7 @@ class Race(BaseRace):
 
     async def _setup_race(self):
         """ Initializes all tasks """
-        self._started = False
-        self._paused = False
+
         self._driver_track_mapping = {}
         for driver in range(self._num_drivers):
             # Map the track to a driver
@@ -41,11 +39,10 @@ class Race(BaseRace):
         if request["request"] == messages.MSG_START:
             self._ensure_future(self._on_start())
         elif request["request"] == messages.MSG_PAUSE:
-            # @TODO
-            pass
-            return False
+            # Cleanup! Do NOT add this to the task list!
+            self.loop.create_task(self._on_pause())
         elif request["request"] == messages.MSG_TRACK_EVENT:
-            return await self._on_track_event(request)
+            self._ensure_future(self._on_track_event(request))
         else:
             logger.warning(f"Could not handle {request}")
             return False
@@ -54,19 +51,37 @@ class Race(BaseRace):
 
     async def _on_start(self):
         """ This method gets called on race start """
-        if self._current_state["status"] == race_states.STARTED:
-            return
+        if not self.started:
+            self.started = True
+            logger.info("Race started")
 
-        self._current_state["status"] = race_states.STARTED
+        # Resume
+        elif self.started and self.paused:
+            self.paused = False
+            logger.info("Race resumed")
 
-        logger.info("Race started")
-        self._started = True
+    async def _on_pause(self):
+        """ This method gets called when the race is paused """
+        if self.started and not self.paused:
+            self.paused = True
+            logger.info("Race paused")
+
+    async def _on_finish(self):
+        """ This method gets called when the race is paused """
+        if self.started and not self.paused:
+            self.finished = True
+            logger.info("Race finished!")
+
+            # Clean up and end tasks
+            for task in self._tasks:
+                task.cancel()
+            logger.info(f"Ended {len(self._tasks)} runing tasks")
 
     async def _on_track_event(self, request):
         """ This method gets called when a track event is registered """
         try:
             if request["type"] == messages.MSG_TRACK_EVENT_LAP_FINISHED:
-                if self._started:
+                if self.started and not self.paused and not self.finished:
                     # Register the driver
                     await self._on_lap_finished(
                             self._driver_track_mapping[
@@ -74,7 +89,8 @@ class Race(BaseRace):
                             int(request["time"]))
                 else:
                     logger.warning(
-                            "Registered track event with no running race")
+                            "Registered track event with no running, finished"
+                            + " or paused race \n" + pformat(request))
             else:
                 logger.warning(
                         f"Unknown track event occured: {request['type']}")

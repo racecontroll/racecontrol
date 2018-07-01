@@ -15,16 +15,22 @@
 field!
 """
 
+# A message should look like this:
+# {
+#     "request": (MSG_START|MSG_PAUSE|MSG_RESET|MSG_FINISH|MSG_TRACK_EVENT),
+#     "type": e.g. MSG_TRACK_EVENT_LAP_FINISHED
+#     ...
+# }
 
-# Single events, no other information required
 MSG_START = "start"
 MSG_PAUSE = "pause"
-MSG_RESET = "pause"
-
-# a request should look like:
-#       {type, **typeargs}
+MSG_RESET = "reset"
+MSG_FINISH = "finish"
 MSG_TRACK_EVENT = "track_event"
+
 # lap_finished passes {"track_id": ..., "time"}
 MSG_TRACK_EVENT_LAP_FINISHED = "lap_finished"
 
+
+# Redis messages
 REDIS_MSG_TYPE_STATE_PUSH = "update_positions"
