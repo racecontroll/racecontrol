@@ -137,16 +137,16 @@ class WSUpdate {
     let tableInnerHTML = WSUpdate.getTableHeader() + "<tr>";
 
     // Iterate over the state and generate the inner HTML for the table
-    for(let driverId of currState["positions"]) {
-      driverId = driverId[0]; // @TODO, for now ignore the lap count and get it from the state dict
+    for(let i = 0; i < currState["positions"].length; i++) {
+      const driverId = currState["positions"][i][0]; // @TODO, for now ignore the lap count and get it from the state dict
       const shortname = document.getElementById(`player-${driverId}-shortname`).innerHTML;
       // Build row
       let row = `<tr class="player-entry" id="player-${driverId}">
-                      <td id="player-${driverId}-position">#${driverId}</td>
+                      <td id="player-${driverId}-position">#${i + 1}</td>
                       <td>${shortname}</td>
                       <td id="player-${driverId}-lap-count">${currState[driverId].lap_count}</td>
-                      <td id="player-${driverId}-best-lap">${currState[driverId].best_time / 1000.0}s</td>
-                      <td id="player-${driverId}-lap-time-last">${currState[driverId].lap_time / 1000.0}s</td>
+                      <td id="player-${driverId}-best-lap">${cvtTime(currState[driverId].best_time)}</td>
+                      <td id="player-${driverId}-lap-time-last">${cvtTime(currState[driverId].lap_time)}</td>
                   </tr>`;
       tableInnerHTML += row;
     }
@@ -221,3 +221,13 @@ function jsDisableElement(id) {
     document.getElementById(id).className = "btn btn-disabled";
   }
 }
+
+function cvtTime(time) {
+  const formatNumber = (number) => ("0" + parseInt(number)).slice(-2);
+
+  if(time !== -1) {
+    return `${formatNumber(time / 60000)}:${formatNumber((time / 1000) % 60)}:${formatNumber((time % 1000) / 10)}`
+  } else  {
+    return "NaN";
+  }
+} 
