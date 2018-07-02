@@ -84,30 +84,37 @@ class WSUpdate {
       case "not_started":
         console.log("Race not started yet");
         jsDisableElement("btn-pause");
+        jsDisableElement("btn-reset");
         jsEnableElement("btn-go");
         // Change text
         document.getElementById("btn-go-caption").innerHTML = " Start"
         document.getElementById("btn-pause-caption").innerHTML = ""
+        document.getElementById("btn-reset-caption").innerHTML = ""
         break;
       case "started":
         console.log("Race running");
         jsDisableElement("btn-go");
+        jsDisableElement("btn-reset");
         jsEnableElement("btn-pause");
         // Change text
         document.getElementById("btn-go-caption").innerHTML = ""
         document.getElementById("btn-pause-caption").innerHTML = " Pause"
+        document.getElementById("btn-reset-caption").innerHTML = ""
         break;
       case "paused":
         console.log("Race paused");
         jsDisableElement("btn-pause");
+        jsEnableElement("btn-reset");
         jsEnableElement("btn-go");
         // Change text
+        document.getElementById("btn-reset-caption").innerHTML = " Reset"
         document.getElementById("btn-go-caption").innerHTML = " Resume"
         document.getElementById("btn-pause-caption").innerHTML = ""
         break;
       case "finished":
         console.log("Race finished");
         jsDisableElement("btn-pause");
+        jsDisableElement("btn-reset");
         jsDisableElement("btn-go");
         break;
       default:
@@ -184,7 +191,7 @@ class WSUpdate {
    */
   reset() {
     try {
-    this.input.send(JSON.stringify({"request": "reset"}));
+    this.input.send(JSON.stringify({"request": "finish"}));
     } catch(e) {
       console.error(e);
     }

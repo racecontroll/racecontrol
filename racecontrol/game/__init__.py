@@ -10,4 +10,5 @@
 """
 
 
+from .game_manager import GameManager
 from .builtin import Race

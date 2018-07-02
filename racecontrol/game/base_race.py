@@ -11,7 +11,6 @@
 
 import logging
 import asyncio
-import aioredis
 import json
 from pprint import pformat
 from json.decoder import JSONDecodeError
@@ -29,23 +28,14 @@ class BaseRace(object):
 
     def __init__(
             self,
-            loop,
+            game_manager,
             num_drivers=defaults.NUM_DRIVERS,
-            redis_uri=defaults.REDIS_URI,
-            outgoing_event_channel=defaults.OUTGOING_EVENT_CHANNEL,
-            incoming_event_channel=defaults.INCOMING_EVENT_CHANNEL
             ):
         """ Init """
         # Set the number of drivers
         self._num_drivers = num_drivers
-        # Set the event loop
-        self._loop = loop
-        # Redis URI
-        self._redis_uri = redis_uri
-        # Outgoing game event channel
-        self._outgoing_event_channel = outgoing_event_channel
-        # Incoming game events, e.g. race start/stop
-        self._incoming_event_channel = incoming_event_channel
+        # Race manager
+        self._game_manager = game_manager
 
         # Initialize game
         self._build_game_state()
@@ -55,7 +45,7 @@ class BaseRace(object):
 
         # Initialize task handler
         self._tasks = []
-        loop.create_task(self._ainit())
+        self._ensure_future(self._ainit())
         logger.info("Created startup task for the actual race interface")
 
     def _ensure_future(self, future):
@@ -64,26 +54,20 @@ class BaseRace(object):
         """
         self._tasks.append(self.loop.create_task(future))
 
+    async def _garbage_collector(self):
+        """ Removes finished coroutines from the task list """
+        while True:
+            for task in self._tasks:
+                if task.done():
+                    self._tasks.remove(task)
+            await asyncio.sleep(1)
+
     async def _ainit(self):
         """ Initializes connection to pubsub, starts track communicator """
-        # Connect to redis
-        self._redis_subscribe = await aioredis.create_redis(self.redis_uri)
-        self._redis_publish = await aioredis.create_redis(self.redis_uri)
-
-        # Create the subscriber for UI events
-        self._subscribe = (await self._redis_subscribe
-                                     .subscribe(
-                                         self.incoming_event_channel))[0]
-
         # Give user code chance to setup the race
-        await self._setup_race()
-
-        # Start input event consumer
-        self._ensure_future(self._input_event_consumer())
-        self.loop.create_task(self._kill_pending_on_exit())
-
-        # Push state every second
+        await self.setup_race()
         self._ensure_future(self._periodic_state_push())
+        # self._ensure_future(self._garbage_collector())
 
     async def _periodic_state_push(self, sleep_time=1):
         """ Pushes the game state at a given number of seconds
@@ -93,22 +77,6 @@ class BaseRace(object):
         while True:
             self._ensure_future(self._push_state())
             await asyncio.sleep(sleep_time)
-
-    async def _kill_pending_on_exit(self):
-        """ Kills remaining tasks when one of the infinite coroutines
-        return or throw an Exception
-        """
-        # Handle all initial tasks and exit if there is an error
-        done, pending = await asyncio.wait(
-            self._tasks,
-            return_when=asyncio.FIRST_COMPLETED
-        )
-
-        if pending:
-            logger.warning("Race might have ended unexpected")
-
-        for task in pending:
-            task.cancel()
 
     def _build_game_state(self):
         """ Initializes the game state """
@@ -126,21 +94,6 @@ class BaseRace(object):
         for driver in range(self.num_drivers):
             self._current_state[driver] = Driver()
 
-    @property
-    def current_state(self):
-        """ Current state of the race """
-        copy = self._current_state.copy()
-        # Ensure we do not deliver the internal state
-        for driver in range(self.num_drivers):
-            copy[driver] = copy[driver].copy()
-
-        return copy
-
-    @property
-    def num_drivers(self):
-        """ Number of drivers in the race """
-        return self._num_drivers
-
     async def _push_state(self):
         """ Pushes the current state to the pubsub so it gets populated over
         the websocket connection established by the web based UI
@@ -151,8 +104,7 @@ class BaseRace(object):
                     "type": messages.REDIS_MSG_TYPE_STATE_PUSH
                     }
 
-            _num_receivers = await self._redis_publish.publish(
-                    self.outgoing_event_channel,
+            _num_receivers = await self.game_manager.push(
                     json.dumps(_state_packet))
 
             # Debug output for the current state and receiver count
@@ -206,14 +158,78 @@ class BaseRace(object):
             except JSONDecodeError:
                 logger.warning("invalid json request")
 
-    async def _setup_race(self):
+    async def handle_request(self, request):
+        """ Handles a request
+
+        :returns: True if an event was handled, false otherwise. This is needed
+                  so that the status can be updated(!!!)
+        """
+        if request["request"] == messages.MSG_START:
+            self._ensure_future(self.on_start())
+        elif request["request"] == messages.MSG_PAUSE:
+            self._ensure_future(self.on_pause())
+        elif request["request"] == messages.MSG_TRACK_EVENT:
+            self._ensure_future(self.on_track_event(request))
+        else:
+            logger.warning(f"Could not handle {request}")
+            return False
+
+        await self._push_state()
+
+    async def handle_finish(self, request):
+        """ This method gets called when the race is finished, it should clean
+        up all running tasks!
+
+        :param request: Request which triggered on_finish
+        """
+        self.finished = True
+
+        # Give the race code the chance to cleanup!
+        await self.on_finish()
+
+        # Nuke running coroutines
+        counter = 0
+        for task in self._tasks:
+            if not task.done():
+                task.cancel()
+                counter += 1
+
+        logger.info(f"Nuked {counter} running tasks")
+
+    async def _on_track_event(self, request):
+        """ This method gets called when a track event is registered """
+        raise NotImplementedError()
+
+    async def setup_race(self):
         """ Race setup goes here, should setup the racemode """
         pass
 
-    async def _handle_request(self, request):
-        """ Request handling goes here """
-        logger.error("_handle_request(self, request) NOT IMPLEMETED")
+    async def on_start(self):
+        """ This method gets called on race start """
         raise NotImplementedError()
+
+    async def on_pause(self):
+        """ This method gets called when the race is paused """
+        raise NotImplementedError()
+
+    async def on_finish(self):
+        """ This method gets called when the race is paused """
+        raise NotImplementedError()
+
+    @property
+    def num_drivers(self):
+        """ Number of drivers in the race """
+        return self._num_drivers
+
+    @property
+    def game_manager(self):
+        """ Race manager """
+        return self._game_manager
+
+    @property
+    def loop(self):
+        """ Event loop """
+        return self.game_manager.loop
 
     @property
     def started(self):
@@ -250,28 +266,17 @@ class BaseRace(object):
 
     @finished.setter
     def finished(self, val):
-        if val and self.started and not self.paused:
-            self._finished = val
-            self._current_state["status"] = race_states.FINISHED
-            # DO NOT ADD THIS TO THE TASK LIST
-            self.loop.create_task(self._push_state())
+        self._finished = val
+        self._current_state["status"] = race_states.FINISHED
+        # DO NOT ADD THIS TO THE TASK LIST
+        self.loop.create_task(self._push_state())
 
     @property
-    def loop(self):
-        """ Eventloop the relay is running on """
-        return self._loop
+    def current_state(self):
+        """ Current state of the race """
+        copy = self._current_state.copy()
+        # Ensure we do not deliver the internal state
+        for driver in range(self.num_drivers):
+            copy[driver] = copy[driver].copy()
 
-    @property
-    def redis_uri(self):
-        """ Redis uri """
-        return self._redis_uri
-
-    @property
-    def outgoing_event_channel(self):
-        """ Outgoing event channel """
-        return self._outgoing_event_channel
-
-    @property
-    def incoming_event_channel(self):
-        """ incoming event channel """
-        return self._incoming_event_channel
+        return copy
