@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    racecontrol.runner.race
-    ~~~~~~~~~~~~~~~~~~~~~~~
+    racecontrol.game.builtin.race
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Race implementation, no fancy modes
 
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class Race(BaseRace):
     """ Standart Race, no fancy modes, just lap for lap """
 
-    async def _setup_race(self):
+    async def setup_race(self):
         """ Initializes all tasks """
 
         self._driver_track_mapping = {}
@@ -30,28 +30,7 @@ class Race(BaseRace):
             # Map the track to a driver
             self._driver_track_mapping[driver] = driver
 
-    async def _handle_request(self, request):
-        """ Handles a request
-
-        :returns: True if an event was handled, false otherwise. This is needed
-                  so that the status can be updated(!!!)
-        """
-        if request["request"] == messages.MSG_START:
-            self._ensure_future(self._on_start())
-        elif request["request"] == messages.MSG_PAUSE:
-            self.loop.create_task(self._on_pause())
-        elif request["request"] == messages.MSG_FINISH:
-            # Cleanup! Do NOT add this to the task list!
-            self.loop.create_task(self._on_finish())
-        elif request["request"] == messages.MSG_TRACK_EVENT:
-            self._ensure_future(self._on_track_event(request))
-        else:
-            logger.warning(f"Could not handle {request}")
-            return False
-
-        return True
-
-    async def _on_start(self):
+    async def on_start(self):
         """ This method gets called on race start """
         if not self.started:
             self.started = True
@@ -62,24 +41,17 @@ class Race(BaseRace):
             self.paused = False
             logger.info("Race resumed")
 
-    async def _on_pause(self):
+    async def on_pause(self):
         """ This method gets called when the race is paused """
         if self.started and not self.paused:
             self.paused = True
             logger.info("Race paused")
 
-    async def _on_finish(self):
+    async def on_finish(self):
         """ This method gets called when the race is paused """
-        if self.started and not self.paused:
-            self.finished = True
-            logger.info("Race finished!")
+        logger.info("Race finished!")
 
-            # Clean up and end tasks
-            for task in self._tasks:
-                task.cancel()
-            logger.info(f"Ended {len(self._tasks)} runing tasks")
-
-    async def _on_track_event(self, request):
+    async def on_track_event(self, request):
         """ This method gets called when a track event is registered """
         try:
             if request["type"] == messages.MSG_TRACK_EVENT_LAP_FINISHED:

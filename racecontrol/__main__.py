@@ -22,7 +22,7 @@ except ImportError:
 import logging
 import multiprocessing as mp
 from .comm import RedisWebsocketRelay
-from .game import Race
+from .game import GameManager
 from .webui import create_app, db
 
 
@@ -43,8 +43,8 @@ def _create_redis_websocket_relay(loop):
 
 def _create_race(loop):
     """ Creats the Race """
-    race = Race(loop, num_drivers=4)
-    return race
+    game_manager = GameManager(loop=loop)
+    return game_manager
 
 
 def _create_webui_task():
